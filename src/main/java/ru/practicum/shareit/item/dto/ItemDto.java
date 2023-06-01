@@ -24,4 +24,5 @@ public class ItemDto {
     private String description;
     @NotNull(groups = ToCreate.class, message = "Доступна ли вещь для аренды?")
     private Boolean available;
+
 }

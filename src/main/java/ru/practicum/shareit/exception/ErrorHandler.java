@@ -19,4 +19,10 @@ public class ErrorHandler {
     public ErrorResponse handlerNotFoundException(final NotFoundException e) {
         return new ErrorResponse(e.getMessage());
     }
+
+    @ExceptionHandler
+    @ResponseStatus(HttpStatus.BAD_REQUEST)
+    public ErrorResponse handlerBadRequestException(final BadRequestException e) {
+        return new ErrorResponse(e.getMessage());
+    }
 }

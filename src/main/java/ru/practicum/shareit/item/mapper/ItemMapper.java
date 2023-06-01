@@ -3,6 +3,7 @@ package ru.practicum.shareit.item.mapper;
 import lombok.Data;
 import ru.practicum.shareit.item.dto.ItemDto;
 import ru.practicum.shareit.item.model.Item;
+import ru.practicum.shareit.user.model.User;
 
 @Data
 public class ItemMapper {
@@ -15,13 +16,13 @@ public class ItemMapper {
                 .build();
     }
 
-    public static Item toItem(ItemDto itemDto, long userId) {
+    public static Item toItem(ItemDto itemDto, User user) {
         return Item.builder()
                 .id(itemDto.getId())
                 .name(itemDto.getName())
                 .description(itemDto.getDescription())
                 .available(itemDto.getAvailable())
-                .owner(userId)
+                .owner(user)
                 .build();
     }
 }

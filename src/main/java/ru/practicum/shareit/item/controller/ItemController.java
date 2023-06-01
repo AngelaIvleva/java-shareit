@@ -18,7 +18,7 @@ import java.util.List;
 public class ItemController {
     private final ItemService itemService;
 
-    private static final String HEADER = "X-Sharer-User-Id";
+    public static final String HEADER = "X-Sharer-User-Id";
 
     @PostMapping
     public ItemDto createItem(@RequestHeader(HEADER) long userId, @Validated(ToCreate.class) @RequestBody ItemDto itemDto) {
