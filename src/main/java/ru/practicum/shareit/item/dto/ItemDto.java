@@ -17,7 +17,7 @@ import javax.validation.constraints.NotNull;
 @NoArgsConstructor
 @Builder
 public class ItemDto {
-    private long id;
+    private Long id;
     @NotBlank(groups = ToCreate.class, message = "Введите название")
     private String name;
     @NotBlank(groups = ToCreate.class, message = "Добавьте пару слов об этой вещи")

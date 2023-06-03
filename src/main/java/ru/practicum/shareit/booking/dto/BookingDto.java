@@ -22,7 +22,7 @@ import java.time.LocalDateTime;
 @Builder
 public class BookingDto {
     @NotNull(groups = {ToUpdate.class}, message = "Введите id")
-    private long id;
+    private Long id;
     @NotNull(groups = {ToCreate.class}, message = "Введите дату старта бронирования")
     @FutureOrPresent(groups = {ToCreate.class})
     private LocalDateTime start;
@@ -30,8 +30,8 @@ public class BookingDto {
     @Future(groups = {ToCreate.class})
     private LocalDateTime end;
     @NotNull(groups = {ToCreate.class}, message = "Введите id вещи")
-    private long itemId;
-    private long bookerId;
+    private Long itemId;
+    private Long bookerId;
     private Status status;
 
 }

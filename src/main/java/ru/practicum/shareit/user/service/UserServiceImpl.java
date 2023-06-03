@@ -17,12 +17,12 @@ import java.util.stream.Collectors;
 @Service
 @RequiredArgsConstructor
 @Slf4j
-@Transactional
 public class UserServiceImpl implements UserService {
 
     private final UserRepository userRepository;
 
     @Override
+    @Transactional
     public List<UserDto> getUsers() {
         return userRepository.findAll().stream()
                 .map(UserMapper::toUserDto)
@@ -30,13 +30,15 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
+    @Transactional
     public UserDto createUser(UserDto userDto) {
         User user = userRepository.save(UserMapper.toUser(userDto));
         return UserMapper.toUserDto(user);
     }
 
     @Override
-    public UserDto updateUser(long id, UserDto userDto) {
+    @Transactional
+    public UserDto updateUser(Long id, UserDto userDto) {
         User user = userRepository.findById(id).orElseThrow(() -> {
             throw new NotFoundException(String.format("Пользователь %d не найден", id));
         });
@@ -56,7 +58,8 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
-    public UserDto getUserById(long id) {
+    @Transactional
+    public UserDto getUserById(Long id) {
         User user = userRepository.findById(id).orElseThrow(() -> {
             log.warn("User with id {} not found", id);
             throw new NotFoundException(String.format("Пользователь id %d не найден", id));
@@ -66,7 +69,8 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
-    public void deleteUserById(long id) {
+    @Transactional
+    public void deleteUserById(Long id) {
         userRepository.findById(id).orElseThrow(() -> {
             throw new NotFoundException(String.format("Пользователь id %d не найден", id));
         });

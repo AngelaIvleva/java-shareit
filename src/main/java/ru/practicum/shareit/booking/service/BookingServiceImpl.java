@@ -21,11 +21,11 @@ import javax.transaction.Transactional;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 import java.util.stream.Collectors;
 
 @Service
 @Slf4j
-@Transactional
 @RequiredArgsConstructor
 public class BookingServiceImpl implements BookingService {
     private final UserRepository userRepository;
@@ -36,17 +36,16 @@ public class BookingServiceImpl implements BookingService {
 
     @Override
     @Transactional
-    public BookingOutputDto addBooking(long bookerId, BookingDto bookingDto) {
+    public BookingOutputDto addBooking(Long bookerId, BookingDto bookingDto) {
         User user = checkUserExistence(bookerId);
         Item item = checkItemExistence(bookingDto.getItemId());
         if (bookingDto.getEnd().isBefore(bookingDto.getStart()) || bookingDto.getEnd().isEqual(bookingDto.getStart())) {
             throw new BadRequestException("Некорректная дата бронирования");
         }
         if (!item.getAvailable()) {
-            throw new BadRequestException(String.format("Объект id %d недоступен для бронирования",
-                    item.getId()));
+            throw new BadRequestException(String.format("Объект id %d недоступен для бронирования", item.getId()));
         }
-        if (item.getOwner().getId() == bookerId) {
+        if (Objects.equals(item.getOwner().getId(), bookerId)) {
             throw new NotFoundException("Владелец вещи не может ее забронировать");
         }
         bookingDto.setStatus(Status.WAITING);
@@ -56,7 +55,7 @@ public class BookingServiceImpl implements BookingService {
 
     @Override
     @Transactional
-    public BookingOutputDto changeStatus(long ownerId, long bookingId, boolean approved) {
+    public BookingOutputDto changeStatus(Long ownerId, Long bookingId, boolean approved) {
         checkUserExistence(ownerId);
         Booking booking = checkBookingExistence(bookingId);
 
@@ -65,7 +64,7 @@ public class BookingServiceImpl implements BookingService {
         }
         Item item = booking.getItem();
 
-        if (item.getOwner().getId() != ownerId) {
+        if (!Objects.equals(item.getOwner().getId(), ownerId)) {
             log.info(String.format("Пользователь id %d не является владельцем вещи", ownerId));
             throw new NotFoundException(String.format("Пользователь id %d не является владельцем вещи", ownerId));
         }
@@ -80,23 +79,23 @@ public class BookingServiceImpl implements BookingService {
 
     @Override
     @Transactional
-    public BookingOutputDto getBookingById(long userId, long bookingId) {
+    public BookingOutputDto getBookingById(Long userId, Long bookingId) {
         checkUserExistence(userId);
         Booking booking = checkBookingExistence(bookingId);
         Item item = booking.getItem();
 
-        if (item.getOwner().getId() != userId && booking.getBooker().getId() != userId) {
+        if (!Objects.equals(item.getOwner().getId(), userId) && !Objects.equals(booking.getBooker().getId(), userId)) {
             log.info("Пользователь должен быть владельцем вещи или автором бронирования");
             throw new NotFoundException(
-                    String.format("Пользователь с id %d должен быть владельцем вещи с id %d " +
-                            "или автором бронирования с id %d", userId, item.getId(), booking.getId()));
+                    String.format("Пользователь id %d должен быть владельцем вещи id %d %s " +
+                            "или автором бронирования id %d", userId, item.getId(), item.getName(), booking.getId()));
         }
         return BookingMapper.toBookingOutputDto(booking);
     }
 
     @Override
     @Transactional
-    public List<BookingOutputDto> getAllByBooker(long bookerId, String state) {
+    public List<BookingOutputDto> getAllByBooker(Long bookerId, String state) {
         User user = checkUserExistence(bookerId);
         List<Booking> bookings = new ArrayList<>();
         switch (state) {
@@ -104,10 +103,10 @@ public class BookingServiceImpl implements BookingService {
                 bookings.addAll(bookingRepository.findByBooker(user, sort));
                 break;
             case "CURRENT":
-                bookings.addAll(bookingRepository.findByBookerAndStartIsBeforeAndEndIsAfter(user, now, now, sort));
+                bookings.addAll(bookingRepository.findByBookerIdCurrent(bookerId));
                 break;
             case "PAST":
-                bookings.addAll(bookingRepository.findByBookerAndEndIsBefore(user, now, sort));
+                bookings.addAll(bookingRepository.findByBookerIdPast(bookerId));
                 break;
             case "FUTURE":
                 bookings.addAll(bookingRepository.findByBookerAndStartIsAfter(user, now, sort));
@@ -128,7 +127,7 @@ public class BookingServiceImpl implements BookingService {
 
     @Override
     @Transactional
-    public List<BookingOutputDto> getAllByOwner(long ownerId, String state) {
+    public List<BookingOutputDto> getAllByOwner(Long ownerId, String state) {
         User user = checkUserExistence(ownerId);
         List<Booking> bookings = new ArrayList<>();
         switch (state) {
@@ -136,10 +135,10 @@ public class BookingServiceImpl implements BookingService {
                 bookings.addAll(bookingRepository.findByItemOwner(user, sort));
                 break;
             case "CURRENT":
-                bookings.addAll(bookingRepository.findByItemOwnerAndStartBeforeAndEndAfter(user, now, now, sort));
+                bookings.addAll(bookingRepository.findByItemOwnerIdCurrent(ownerId));
                 break;
             case "PAST":
-                bookings.addAll(bookingRepository.findByItemOwnerAndEndBefore(user, now, sort));
+                bookings.addAll(bookingRepository.findByItemOwnerIdPast(ownerId));
                 break;
             case "FUTURE":
                 bookings.addAll(bookingRepository.findByItemOwnerAndStartAfter(user, now, sort));
@@ -158,7 +157,7 @@ public class BookingServiceImpl implements BookingService {
                 .collect(Collectors.toList());
     }
 
-    private User checkUserExistence(long userId) {
+    private User checkUserExistence(Long userId) {
         log.info(String.format("Поиск пользователя с id %d", userId));
         return userRepository.findById(userId).orElseThrow(() -> {
             log.info(String.format("Пользователя с id %d не найден", userId));
@@ -166,7 +165,7 @@ public class BookingServiceImpl implements BookingService {
         });
     }
 
-    private Item checkItemExistence(long itemId) {
+    private Item checkItemExistence(Long itemId) {
         log.info(String.format("Поиск объекта с id %d", itemId));
         return itemRepository.findById(itemId).orElseThrow(() -> {
             log.info(String.format("Объект id %d  не найден", itemId));
@@ -174,7 +173,7 @@ public class BookingServiceImpl implements BookingService {
         });
     }
 
-    private Booking checkBookingExistence(long bookingId) {
+    private Booking checkBookingExistence(Long bookingId) {
         log.info(String.format("Поиск брони с id %d", bookingId));
         return bookingRepository.findById(bookingId).orElseThrow(() -> {
             log.info(String.format("Бронь id %d  не найдена", bookingId));
