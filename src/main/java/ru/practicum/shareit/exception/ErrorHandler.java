@@ -23,6 +23,14 @@ public class ErrorHandler {
     @ExceptionHandler
     @ResponseStatus(HttpStatus.BAD_REQUEST)
     public ErrorResponse handlerBadRequestException(final BadRequestException e) {
-        return new ErrorResponse(e.getMessage());
+        return new ErrorResponse((e.getMessage()));
+    }
+
+    @ExceptionHandler
+    @ResponseStatus(HttpStatus.INTERNAL_SERVER_ERROR)
+    public ErrorResponse handlerRuntimeException(final RuntimeException e) {
+        if (e.getMessage().contains("UNSUPPORTED_STATUS"))
+            return new ErrorResponse("Unknown state: UNSUPPORTED_STATUS");
+        return new ErrorResponse((e.getMessage()));
     }
 }

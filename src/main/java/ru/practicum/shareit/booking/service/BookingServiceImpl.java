@@ -8,6 +8,7 @@ import ru.practicum.shareit.booking.dto.BookingDto;
 import ru.practicum.shareit.booking.dto.BookingOutputDto;
 import ru.practicum.shareit.booking.mapper.BookingMapper;
 import ru.practicum.shareit.booking.model.Booking;
+import ru.practicum.shareit.booking.model.State;
 import ru.practicum.shareit.booking.model.Status;
 import ru.practicum.shareit.booking.repository.BookingRepository;
 import ru.practicum.shareit.exception.BadRequestException;
@@ -95,26 +96,26 @@ public class BookingServiceImpl implements BookingService {
 
     @Override
     @Transactional
-    public List<BookingOutputDto> getAllByBooker(Long bookerId, String state) {
+    public List<BookingOutputDto> getAllByBooker(Long bookerId, State state) {
         User user = checkUserExistence(bookerId);
         List<Booking> bookings = new ArrayList<>();
         switch (state) {
-            case "ALL":
+            case ALL:
                 bookings.addAll(bookingRepository.findByBooker(user, sort));
                 break;
-            case "CURRENT":
+            case CURRENT:
                 bookings.addAll(bookingRepository.findByBookerIdCurrent(bookerId));
                 break;
-            case "PAST":
+            case PAST:
                 bookings.addAll(bookingRepository.findByBookerIdPast(bookerId));
                 break;
-            case "FUTURE":
+            case FUTURE:
                 bookings.addAll(bookingRepository.findByBookerAndStartIsAfter(user, now, sort));
                 break;
-            case "WAITING":
+            case WAITING:
                 bookings.addAll(bookingRepository.findByBookerAndStatus(user, Status.WAITING, sort));
                 break;
-            case "REJECTED":
+            case REJECTED:
                 bookings.addAll(bookingRepository.findByBookerAndStatus(user, Status.REJECTED, sort));
                 break;
             default:
@@ -127,26 +128,26 @@ public class BookingServiceImpl implements BookingService {
 
     @Override
     @Transactional
-    public List<BookingOutputDto> getAllByOwner(Long ownerId, String state) {
+    public List<BookingOutputDto> getAllByOwner(Long ownerId, State state) {
         User user = checkUserExistence(ownerId);
         List<Booking> bookings = new ArrayList<>();
         switch (state) {
-            case "ALL":
+            case ALL:
                 bookings.addAll(bookingRepository.findByItemOwner(user, sort));
                 break;
-            case "CURRENT":
+            case CURRENT:
                 bookings.addAll(bookingRepository.findByItemOwnerIdCurrent(ownerId));
                 break;
-            case "PAST":
+            case PAST:
                 bookings.addAll(bookingRepository.findByItemOwnerIdPast(ownerId));
                 break;
-            case "FUTURE":
+            case FUTURE:
                 bookings.addAll(bookingRepository.findByItemOwnerAndStartAfter(user, now, sort));
                 break;
-            case "WAITING":
+            case WAITING:
                 bookings.addAll(bookingRepository.findByItemOwnerAndStatusEquals(user, Status.WAITING, sort));
                 break;
-            case "REJECTED":
+            case REJECTED:
                 bookings.addAll(bookingRepository.findByItemOwnerAndStatusEquals(user, Status.REJECTED, sort));
                 break;
             default:
