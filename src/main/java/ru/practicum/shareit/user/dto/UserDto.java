@@ -17,10 +17,11 @@ import javax.validation.constraints.NotNull;
 @Builder
 public class UserDto {
 
-    private long id;
-    @NotBlank(groups = ToCreate.class, message = "Введите имя")
+    private Long id;
+    @NotBlank(groups = {ToCreate.class}, message = "Введите имя")
     private String name;
-    @NotNull(groups = ToCreate.class)
+    @NotNull(groups = {ToCreate.class})
     @Email(groups = {ToCreate.class, ToUpdate.class}, message = "Некорректный адрес электронной почты")
     private String email;
+
 }
