@@ -46,6 +46,7 @@ class ItemRequestRepositoryTest {
             .owner(user1)
             .itemRequest(itemRequest)
             .build();
+
     @Test
     void shouldFindAllByRequestorId() {
         em.persist(user1);

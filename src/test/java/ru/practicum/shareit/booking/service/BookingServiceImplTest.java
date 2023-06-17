@@ -333,7 +333,6 @@ public class BookingServiceImplTest {
                 findByBookerAndStatus(any(User.class), any(), any());
     }
 
-
     @Test
     void shouldNotGetAllByBookerAndThrowExceptionWhenBookerNotFound() {
         when(userRepository.findById(anyLong()))

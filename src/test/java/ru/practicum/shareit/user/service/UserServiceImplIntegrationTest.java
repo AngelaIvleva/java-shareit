@@ -26,6 +26,7 @@ class UserServiceImplIntegrationTest {
             .email("email@ex.com")
             .name("Harry Potter")
             .build();
+
     @Test
     void shouldUpdateUser() {
         User user3 = User.builder()

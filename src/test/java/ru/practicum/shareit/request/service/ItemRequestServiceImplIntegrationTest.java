@@ -55,6 +55,7 @@ class ItemRequestServiceImplIntegrationTest {
             .owner(user)
             .itemRequest(itemRequest)
             .build();
+
     @Test
     void shouldGetItemRequests() {
         userRepository.save(user);
