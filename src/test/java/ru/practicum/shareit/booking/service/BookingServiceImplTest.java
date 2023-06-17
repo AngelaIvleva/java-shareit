@@ -329,7 +329,6 @@ public class BookingServiceImplTest {
 
         List<BookingOutputDto> response = bookingService.getAllByBooker(user1.getId(), State.REJECTED, 0, 10);
         assertEquals(booking.getItem().getName(), response.get(0).getItem().getName());
-
         verify(bookingRepository, Mockito.times(1)).
                 findByBookerAndStatus(any(User.class), any(), any());
     }
