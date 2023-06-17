@@ -2,6 +2,7 @@ package ru.practicum.shareit.item.service;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 import ru.practicum.shareit.booking.dto.BookingDateDto;
@@ -20,6 +21,8 @@ import ru.practicum.shareit.item.model.Comment;
 import ru.practicum.shareit.item.model.Item;
 import ru.practicum.shareit.item.repository.CommentRepository;
 import ru.practicum.shareit.item.repository.ItemRepository;
+import ru.practicum.shareit.request.model.ItemRequest;
+import ru.practicum.shareit.request.repository.ItemRequestRepository;
 import ru.practicum.shareit.user.model.User;
 import ru.practicum.shareit.user.repository.UserRepository;
 
@@ -37,13 +40,19 @@ public class ItemServiceImpl implements ItemService {
     private final UserRepository userRepository;
     private final BookingRepository bookingRepository;
     private final CommentRepository commentRepository;
+    private final ItemRequestRepository requestRepository;
 
     @Override
     @Transactional
     public ItemDto createItem(Long userId, ItemDto itemDto) {
         User user = checkUserExistence(userId);
-        Item item = itemRepository.save(ItemMapper.toItem(itemDto, user));
-        return ItemMapper.toItemDto(item);
+        Item item = ItemMapper.toItem(itemDto, user);
+        if (itemDto.getRequestId() != null) {
+            ItemRequest request = requestRepository.findById(itemDto.getRequestId()).orElseThrow(
+                    () -> new NotFoundException(String.format("Запрос id %d не найден", itemDto.getRequestId())));
+            item.setItemRequest(request);
+        }
+        return ItemMapper.toItemDto(itemRepository.save(item));
     }
 
     @Override
@@ -104,13 +113,11 @@ public class ItemServiceImpl implements ItemService {
 
     @Transactional
     @Override
-    public List<ItemBookingDto> getItems(Long userId) {
-        List<Item> items = itemRepository.findAllByOwnerId(userId);
-        if (items.isEmpty()) {
-            return new ArrayList<>();
-        }
+    public List<ItemBookingDto> getItems(Long userId, int from, int size) {
+        PageRequest pageRequest = PageRequest.of(from / size, size);
 
-        List<ItemBookingDto> itemBookingDtoList = items.stream()
+        List<ItemBookingDto> itemBookingDtoList = itemRepository.findAllByOwnerIdOrderByIdAsc(userId, pageRequest)
+                .stream()
                 .map(ItemMapper::toItemBookingDto)
                 .collect(Collectors.toList());
 
@@ -147,11 +154,12 @@ public class ItemServiceImpl implements ItemService {
     }
 
     @Override
-    public List<ItemDto> searchItem(String text) {
+    public List<ItemDto> searchItem(String text, int from, int size) {
         if (text.isEmpty()) {
             return new ArrayList<>();
         }
-        return itemRepository.searchItemsByText(text).stream()
+        PageRequest pageRequest = PageRequest.of((from / size), size);
+        return itemRepository.searchItemsByText(text, pageRequest).stream()
                 .map(ItemMapper::toItemDto)
                 .collect(Collectors.toList());
     }
@@ -164,6 +172,8 @@ public class ItemServiceImpl implements ItemService {
         Optional<Booking> booking = bookingRepository.findFirstByItemAndBookerAndEndIsBeforeOrderByEnd(
                 item, author, LocalDateTime.now());
         if (booking.isEmpty()) {
+            log.warn((String.format("Пользователь %s %d никогда не бронировал %s",
+                    author.getName(), authorId, item.getName())));
             throw new BadRequestException(String.format("Пользователь %s %d никогда не бронировал %s",
                     author.getName(), authorId, item.getName()));
         }

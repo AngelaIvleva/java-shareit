@@ -9,13 +9,13 @@ import ru.practicum.shareit.booking.model.State;
 import ru.practicum.shareit.booking.service.BookingService;
 import ru.practicum.shareit.user.ToCreate;
 
+import javax.validation.constraints.Positive;
+import javax.validation.constraints.PositiveOrZero;
 import java.util.List;
 
 import static ru.practicum.shareit.item.controller.ItemController.HEADER;
 
-/**
- * TODO Sprint add-bookings.
- */
+@Validated
 @RestController
 @RequiredArgsConstructor
 @RequestMapping("/bookings")
@@ -43,13 +43,21 @@ public class BookingController {
 
     @GetMapping
     public List<BookingOutputDto> getAllByBooker(@RequestHeader(HEADER) Long bookerId,
-                                                 @RequestParam(defaultValue = "ALL", required = false) State state) {
-        return bookingService.getAllByBooker(bookerId, state);
+                                                 @RequestParam(defaultValue = "ALL", required = false) State state,
+                                                 @PositiveOrZero @RequestParam(value = "from",
+                                                         defaultValue = "0", required = false) int from,
+                                                 @Positive @RequestParam(value = "size", defaultValue = "10",
+                                                         required = false) int size) {
+        return bookingService.getAllByBooker(bookerId, state, from, size);
     }
 
     @GetMapping("/owner")
     public List<BookingOutputDto> getAllByOwner(@RequestHeader(HEADER) Long ownerId,
-                                                @RequestParam(defaultValue = "ALL", required = false) State state) {
-        return bookingService.getAllByOwner(ownerId, state);
+                                                @RequestParam(defaultValue = "ALL", required = false) State state,
+                                                @PositiveOrZero @RequestParam(value = "from",
+                                                        defaultValue = "0", required = false) int from,
+                                                @Positive @RequestParam(value = "size", defaultValue = "10",
+                                                        required = false) int size) {
+        return bookingService.getAllByOwner(ownerId, state, from, size);
     }
 }

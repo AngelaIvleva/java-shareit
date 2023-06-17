@@ -62,7 +62,13 @@
 			<groupId>org.hibernate</groupId>
 			<artifactId>hibernate-core</artifactId>
 		</dependency>
-	</dependencies>
+        <dependency>
+            <groupId>junit</groupId>
+            <artifactId>junit</artifactId>
+            <scope>test</scope>
+        </dependency>
+
+    </dependencies>
 
 	<build>
 		<resources>
@@ -206,6 +212,8 @@
 						</execution>
 					</executions>
 				</plugin>
+
+
 			</plugins>
 		</pluginManagement>
 	</build>
