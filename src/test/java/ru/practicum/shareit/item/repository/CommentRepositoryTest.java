@@ -54,6 +54,6 @@ class CommentRepositoryTest {
         List<Comment> comments = commentRepository
                 .findAllByItemId(item1.getId());
         assertEquals(1, comments.size());
-        assertEquals(item1.getId(), comments.get(0).getId());
+        assertEquals(comment, comments.get(0));
     }
 }
