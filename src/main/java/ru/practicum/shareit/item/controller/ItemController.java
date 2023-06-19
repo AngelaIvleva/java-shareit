@@ -9,11 +9,10 @@ import ru.practicum.shareit.item.dto.ItemDto;
 import ru.practicum.shareit.item.service.ItemService;
 import ru.practicum.shareit.user.ToCreate;
 
+import javax.validation.constraints.Positive;
+import javax.validation.constraints.PositiveOrZero;
 import java.util.List;
 
-/**
- * TODO Sprint add-controllers.
- */
 @RestController
 @RequiredArgsConstructor
 @RequestMapping("/items")
@@ -40,13 +39,21 @@ public class ItemController {
     }
 
     @GetMapping
-    public List<ItemBookingDto> getItems(@RequestHeader(HEADER) Long userId) {
-        return itemService.getItems(userId);
+    public List<ItemBookingDto> getItems(@RequestHeader(HEADER) Long userId,
+                                         @PositiveOrZero @RequestParam(value = "from",
+                                                 defaultValue = "0", required = false) int from,
+                                         @Positive @RequestParam(value = "size", defaultValue = "10",
+                                                 required = false) int size) {
+        return itemService.getItems(userId, from, size);
     }
 
     @GetMapping("/search")
-    public List<ItemDto> searchItem(@RequestParam String text) {
-        return itemService.searchItem(text);
+    public List<ItemDto> searchItem(@RequestParam String text,
+                                    @PositiveOrZero @RequestParam(value = "from",
+                                            defaultValue = "0", required = false) int from,
+                                    @Positive @RequestParam(value = "size", defaultValue = "10",
+                                            required = false) int size) {
+        return itemService.searchItem(text, from, size);
     }
 
     @PostMapping("/{itemId}/comment")
